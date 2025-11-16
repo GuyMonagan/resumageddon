@@ -1,0 +1,12 @@
+import json
+from typing import List
+from ..models.vacancy import Vacancy
+
+
+def load_vacancies_from_file(filename: str) -> List[Vacancy]:
+    with open(filename, "r", encoding="utf-8") as f:
+        raw_data = json.load(f)
+
+    items = raw_data.get("items", [])
+    vacancies = [Vacancy.from_json(item) for item in items]
+    return vacancies
