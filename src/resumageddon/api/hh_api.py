@@ -1,35 +1,34 @@
-from .base_api import VacancyAPI
-from .abstract_api import VacancyAPI
+import os
+from typing import Dict, List
+
 import requests
-from typing import List, Dict
+from dotenv import load_dotenv
+
+from .abstract_api import VacancyAPI
+
+# Загружаем переменные окружения из .env файла
+load_dotenv()
 
 
 class HeadHunterAPI(VacancyAPI):
-    BASE_URL = "https://api.hh.ru/vacancies"
-
     def __init__(self):
-        self._headers = {
-            "User-Agent": "ResumageddonBot/1.0"
-        }
+        # Берём URL из переменной окружения, иначе используем дефолт
+        self._base_url = os.getenv("HH_API_BASE_URL", "https://api.hh.ru/vacancies")
+        self._headers = {"User-Agent": "ResumageddonBot/1.0"}
 
     def _get(self, params: dict):
         """Приватный метод для отправки GET-запроса."""
-        response = requests.get(self.BASE_URL, headers=self._headers, params=params)
+        response = requests.get(self._base_url, headers=self._headers, params=params)
         if response.status_code != 200:
             raise Exception(f"Ошибка при запросе: {response.status_code}")
         return response.json()
 
-    def get_vacancies(self, keyword: str):
+    def get_vacancies(self, keyword: str) -> List[Dict]:
         """Получает вакансии по ключевому слову с API HH"""
         all_vacancies = []
-        params = {
-            "text": keyword,
-            "per_page": 20,   # можно изменить на 50–100, если хочешь
-            "page": 0
-        }
+        params = {"text": keyword, "per_page": 20, "page": 0}
 
-        # Можно собрать несколько страниц, если нужно
-        for page in range(2):  # пример: 2 страницы
+        for page in range(2):
             params["page"] = page
             data = self._get(params)
             items = data.get("items", [])

@@ -1,4 +1,3 @@
-import pytest
 from src.resumageddon.models.vacancy import Vacancy
 
 
@@ -9,7 +8,7 @@ def test_vacancy_creation():
         salary=150000,
         link="https://example.com",
         requirement="Python, Django",
-        responsibility="Develop backend services"
+        responsibility="Develop backend services",
     )
     assert v.title == "Python Developer"
     assert v.salary == 150000
@@ -21,7 +20,7 @@ def test_salary_validation():
         title="Test",
         description="desc",
         salary=-100,  # должно пройти через _validate_salary
-        link="link"
+        link="link",
     )
     assert v.salary == 0  # зарплата должна быть приведена к 0
 
@@ -48,10 +47,7 @@ def test_to_dict_and_from_json():
         "name": "Python Dev",
         "alternate_url": "http://hh.ru/vacancy/123",
         "salary": {"from": 100000, "to": 150000},
-        "snippet": {
-            "requirement": "Python",
-            "responsibility": "Backend"
-        }
+        "snippet": {"requirement": "Python", "responsibility": "Backend"},
     }
     v = Vacancy.from_json(data)
     d = v.to_dict()

@@ -1,4 +1,3 @@
-import json
 from src.resumageddon.models.vacancy import Vacancy
 from src.resumageddon.storage.json_saver import JSONSaver
 
@@ -17,7 +16,7 @@ def test_add_and_get_vacancy(tmp_path):
         salary=100000,
         link="http://example.com",
         requirement="Python",
-        responsibility="Coding"
+        responsibility="Coding",
     )
 
     # Добавляем и читаем обратно
@@ -39,7 +38,7 @@ def test_no_duplicates(tmp_path):
         salary=200000,
         link="http://example.com",
         requirement="req",
-        responsibility="resp"
+        responsibility="resp",
     )
 
     saver.add_vacancy(vacancy)

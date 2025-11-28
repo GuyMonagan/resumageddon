@@ -1,10 +1,7 @@
 from resumageddon.api.hh_api import HeadHunterAPI
 from resumageddon.storage.json_saver import JSONSaver
-from resumageddon.utils.filtering import (
-    filter_by_keyword,
-    sort_by_salary,
-    get_top_n
-)
+from resumageddon.utils.filtering import filter_by_keyword, get_top_n, sort_by_salary
+
 
 def print_vacancies(vacancies):
     if not vacancies:
@@ -28,6 +25,7 @@ def main():
 
     # Преобразуем JSON-данные в объекты Vacancy
     from resumageddon.models.vacancy import Vacancy
+
     vacancies = [Vacancy.from_json(item) for item in raw_vacancies]
 
     print(f"🔎 Найдено {len(vacancies)} вакансий.")
@@ -51,18 +49,22 @@ def main():
     saver = JSONSaver()
 
     while True:
-        choice = input("💾 Сохранить вакансии (s), очистить файл (c), выйти (q): ").lower()
-        if choice == 's':
+        choice = input(
+            "💾 Сохранить вакансии (s), очистить файл (c), выйти (q): "
+        ).lower()
+        if choice == "s":
             for vacancy in top_vacancies:
                 saver.add_vacancy(vacancy)
             print("✅ Вакансии сохранены.")
-        elif choice == 'c':
-            confirm = input("🧹 Ты точно хочешь удалить все сохранённые вакансии? (y/n): ").lower()
-            if confirm == 'y':
+        elif choice == "c":
+            confirm = input(
+                "🧹 Ты точно хочешь удалить все сохранённые вакансии? (y/n): "
+            ).lower()
+            if confirm == "y":
                 for vacancy in saver.get_vacancies():
                     saver.delete_vacancy(vacancy)
                 print("🗑️ Все вакансии удалены.")
-        elif choice == 'q':
+        elif choice == "q":
             print("👋 Выход из программы.")
             break
         else:
