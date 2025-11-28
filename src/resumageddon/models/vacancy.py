@@ -8,7 +8,8 @@ class Vacancy:
         "salary",
         "description",
         "requirement",
-        "responsibility"
+        "responsibility",
+        "salary_str"
     )
 
     def __init__(
@@ -22,10 +23,16 @@ class Vacancy:
     ):
         self.title = title
         self.link = link
-        self.salary = salary
+        self.salary = self._validate_salary(salary)
         self.description = description
         self.requirement = requirement
         self.responsibility = responsibility
+
+    def _validate_salary(self, salary: int) -> int:
+        if isinstance(salary, int) and salary >= 0:
+            return salary
+        return 0
+
 
     def __repr__(self) -> str:
         return f"<Vacancy {self.title} ({self.salary})>"
@@ -60,14 +67,32 @@ class Vacancy:
     def from_json(cls, data: dict) -> 'Vacancy':
         title = data.get("name", "Без названия")
         link = data.get("alternate_url", "")
-        salary = cls._parse_salary(data.get("salary"))
+        salary_data = data.get("salary")
+        salary = cls._parse_salary(salary_data)
+
+        # Строка для отображения
+        if not salary_data:
+            salary_str = "Зарплата не указана"
+        else:
+            _from = salary_data.get("from")
+            _to = salary_data.get("to")
+            currency = salary_data.get("currency", "RUR")
+
+            if _from and _to:
+                salary_str = f"{_from:,} – {_to:,} {currency}".replace(",", " ")
+            elif _from:
+                salary_str = f"от {_from:,} {currency}".replace(",", " ")
+            elif _to:
+                salary_str = f"до {_to:,} {currency}".replace(",", " ")
+            else:
+                salary_str = "Зарплата не указана"
 
         snippet = data.get("snippet", {})
         requirement = snippet.get("requirement", "")
         responsibility = snippet.get("responsibility", "")
         description = f"{requirement} {responsibility}".strip()
 
-        return cls(
+        vacancy = cls(
             title=title,
             link=link,
             salary=salary,
@@ -75,6 +100,10 @@ class Vacancy:
             requirement=requirement,
             responsibility=responsibility
         )
+
+        # 👇 Добавляем динамически строку для отображения
+        vacancy.salary_str = salary_str
+        return vacancy
 
     def to_dict(self) -> dict:
         return {

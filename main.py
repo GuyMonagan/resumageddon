@@ -1,4 +1,4 @@
-from resumageddon.utils.debug_loader import load_vacancies_from_file
+from resumageddon.api.hh_api import HeadHunterAPI
 from resumageddon.storage.json_saver import JSONSaver
 from resumageddon.utils.filtering import (
     filter_by_keyword,
@@ -6,14 +6,13 @@ from resumageddon.utils.filtering import (
     get_top_n
 )
 
-
 def print_vacancies(vacancies):
     if not vacancies:
         print("⚠ По вашему запросу ничего не найдено.")
         return
 
     for v in vacancies:
-        print(f"{v.title} | {v.salary} руб. | {v.link}")
+        print(f"{v.title} | {v.salary_str} | {v.link}")
         print(f"Описание: {v.description}")
         print("-" * 60)
 
@@ -21,14 +20,19 @@ def print_vacancies(vacancies):
 def main():
     print("🧠 Resumageddon запущен.")
 
-    DATA_FILE = "data/vacancies.json"
+    keyword = input("Введите ключевое слово для поиска (например 'Django'): ")
 
-    vacancies = load_vacancies_from_file(DATA_FILE)
-    print(f"Загружено {len(vacancies)} вакансий из локального файла.")
+    # 🆕 Получаем вакансии с HH API
+    api = HeadHunterAPI()
+    raw_vacancies = api.get_vacancies(keyword)
 
-    keyword = input("Введите ключевое слово для фильтрации (например 'Django'): ")
+    # Преобразуем JSON-данные в объекты Vacancy
+    from resumageddon.models.vacancy import Vacancy
+    vacancies = [Vacancy.from_json(item) for item in raw_vacancies]
+
+    print(f"🔎 Найдено {len(vacancies)} вакансий.")
+
     filtered = filter_by_keyword(vacancies, keyword)
-
     if not filtered:
         print("⚠ По вашему запросу ничего не найдено.")
         return
